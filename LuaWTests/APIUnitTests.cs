@@ -48,7 +48,7 @@ namespace LuaWTests
         [TestMethod]
         public void lua_pushstring()
         {
-            var s = Marshal.PtrToStringAnsi(Lua.lua_pushstring(L, "hello"));
+            var s = Lua.lua_pushstring(L, "hello");
 
             Assert.AreEqual(s, "hello");
         }
@@ -56,7 +56,7 @@ namespace LuaWTests
         [TestMethod]
         public void lua_gettop()
         {
-            var s = Marshal.PtrToStringAnsi(Lua.lua_pushstring(L, "hello"));
+            var s = Lua.lua_pushstring(L, "hello");
 
             var t = Lua.lua_gettop(L);
 
@@ -66,9 +66,9 @@ namespace LuaWTests
         [TestMethod]
         public void lua_tostring()
         {
-            var s = Marshal.PtrToStringAnsi(Lua.lua_pushstring(L, "hello"));
+            var s = Lua.lua_pushstring(L, "hello");
 
-            var s2 = Marshal.PtrToStringAnsi(Lua.lua_tostring(L, -1));
+            var s2 = Lua.lua_tostring(L, -1);
 
             Assert.AreEqual(s, s2);
         }

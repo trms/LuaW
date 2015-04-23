@@ -17,6 +17,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Runtime.InteropServices;
+using System.Diagnostics;
 
 namespace LuaW
 {
@@ -29,26 +30,26 @@ namespace LuaW
         /*
         ** basic types
         */
-        const int LUA_TNONE = (-1);
+        public const int LUA_TNONE = (-1);
 
-        const int LUA_TNIL = 0;
-        const int LUA_TBOOLEAN = 1;
-        const int LUA_TLIGHTUSERDATA = 2;
-        const int LUA_TNUMBER = 3;
-        const int LUA_TSTRING = 4;
-        const int LUA_TTABLE = 5;
-        const int LUA_TFUNCTION = 6;
-        const int LUA_TUSERDATA = 7;
-        const int LUA_TTHREAD = 8;
+        public const int LUA_TNIL = 0;
+        public const int LUA_TBOOLEAN = 1;
+        public const int LUA_TLIGHTUSERDATA = 2;
+        public const int LUA_TNUMBER = 3;
+        public const int LUA_TSTRING = 4;
+        public const int LUA_TTABLE = 5;
+        public const int LUA_TFUNCTION = 6;
+        public const int LUA_TUSERDATA = 7;
+        public const int LUA_TTHREAD = 8;
 
-        const int LUAI_MAXSTACK = 1000000;
-        const int LUAI_FIRSTPSEUDOIDX = (-LUAI_MAXSTACK - 1000);
-        const int LUA_REGISTRYINDEX = LUAI_FIRSTPSEUDOIDX;
+        public const int LUAI_MAXSTACK = 1000000;
+        public const int LUAI_FIRSTPSEUDOIDX = (-LUAI_MAXSTACK - 1000);
+        public const int LUA_REGISTRYINDEX = LUAI_FIRSTPSEUDOIDX;
 
         /* predefined values in the registry */
-        const int LUA_RIDX_MAINTHREAD = 1;
-        const int LUA_RIDX_GLOBALS = 2;
-        const int LUA_RIDX_LAST = LUA_RIDX_GLOBALS;
+        public const int LUA_RIDX_MAINTHREAD = 1;
+        public const int LUA_RIDX_GLOBALS = 2;
+        public const int LUA_RIDX_LAST = LUA_RIDX_GLOBALS;
 
         /*
          * lua
@@ -96,26 +97,52 @@ namespace LuaW
         ** access functions (stack -> C)
         */
 
-        [DllImport("lua53.dll", CallingConvention = CallingConvention.Cdecl)]
-        public static extern int lua_isnumber(IntPtr L, int idx);
+        [DllImport("lua53.dll", CallingConvention = CallingConvention.Cdecl, EntryPoint="lua_isnumber")]
+        public static extern int _lua_isnumber(IntPtr L, int idx);
+        public static Boolean lua_isnumber(IntPtr L, int idx)
+        {
+            return _lua_isnumber(L, idx) == 1;
+        }
 
-        [DllImport("lua53.dll", CallingConvention = CallingConvention.Cdecl)]
-        public static extern int lua_isstring(IntPtr L, int idx);
+        [DllImport("lua53.dll", CallingConvention = CallingConvention.Cdecl, EntryPoint="lua_isstring")]
+        public static extern int _lua_isstring(IntPtr L, int idx);
+        public static Boolean lua_isstring(IntPtr L, int idx)
+        {
+            return _lua_isstring(L, idx) == 1;
+        }
 
-        [DllImport("lua53.dll", CallingConvention = CallingConvention.Cdecl)]
-        public static extern int lua_iscfunction(IntPtr L, int idx);
+        [DllImport("lua53.dll", CallingConvention = CallingConvention.Cdecl, EntryPoint="lua_iscfunction")]
+        public static extern int _lua_iscfunction(IntPtr L, int idx);
+        public static Boolean lua_iscfunction(IntPtr L, int idx)
+        {
+            return _lua_iscfunction(L, idx) == 1;
+        }
 
-        [DllImport("lua53.dll", CallingConvention = CallingConvention.Cdecl)]
-        public static extern int lua_isinteger(IntPtr L, int idx);
+        [DllImport("lua53.dll", CallingConvention = CallingConvention.Cdecl, EntryPoint="lua_isinteger")]
+        public static extern int _lua_isinteger(IntPtr L, int idx);
+        public static Boolean lua_isinteger(IntPtr L, int idx)
+        {
+            return _lua_iscfunction(L, idx) == 1;
+        }
 
-        [DllImport("lua53.dll", CallingConvention = CallingConvention.Cdecl)]
-        public static extern int lua_isuserdata(IntPtr L, int idx);
+        [DllImport("lua53.dll", CallingConvention = CallingConvention.Cdecl, EntryPoint="lua_isuserdata")]
+        public static extern int _lua_isuserdata(IntPtr L, int idx);
+        public static Boolean lua_isuserdata(IntPtr L, int idx)
+        {
+            return _lua_isuserdata(L, idx) == 1;
+        }
 
         [DllImport("lua53.dll", CallingConvention = CallingConvention.Cdecl)]
         public static extern int lua_type(IntPtr L, int idx);
 
-        [DllImport("lua53.dll", CharSet = CharSet.Ansi)]
-        public static extern String lua_typename(IntPtr L, int tp);
+        [DllImport("lua53.dll", CallingConvention = CallingConvention.Cdecl, EntryPoint = "lua_typename")]
+        public static extern IntPtr _lua_typename(IntPtr L, int tp);
+        public static String lua_typename(IntPtr L, int tp)
+        {
+            IntPtr p = L;
+            int t = tp;
+            return Marshal.PtrToStringAnsi(_lua_typename(p, t));
+        }
 
         [DllImport("lua53.dll", CallingConvention = CallingConvention.Cdecl)]
         public static extern double lua_tonumberx(IntPtr L, int idx, IntPtr isnum);
@@ -126,8 +153,17 @@ namespace LuaW
         [DllImport("lua53.dll", CallingConvention = CallingConvention.Cdecl)]
         public static extern int lua_toboolean(IntPtr L, int idx);
 
-        [DllImport("lua53.dll", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
-        public static extern IntPtr lua_tolstring(IntPtr L, int idx, out uint len);
+        [DllImport("lua53.dll", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi, EntryPoint = "lua_tolstring")]
+        public static extern IntPtr _lua_tolstring(IntPtr L, int idx, ref uint len);
+        public static String lua_tolstring(IntPtr L, int idx, ref uint len)
+        {
+            IntPtr p = L;
+            int i = idx;
+            uint l = len;
+            String s = Marshal.PtrToStringAnsi(_lua_tolstring(p, i, ref l));
+            len = l;
+            return s;
+        }
 
         [DllImport("lua53.dll", CallingConvention = CallingConvention.Cdecl)]
         public static extern uint lua_rawlen(IntPtr L, int idx);
@@ -167,12 +203,25 @@ namespace LuaW
 
         [DllImport("lua53.dll", CallingConvention = CallingConvention.Cdecl)]
         public static extern void lua_pushinteger(IntPtr L, Int64 n);
-        
-        [DllImport("lua53.dll", CharSet = CharSet.Ansi)]
-        public static extern String lua_pushlstring(IntPtr L, String s, Int32 len);
 
-        [DllImport("lua53.dll", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
-        public static extern IntPtr lua_pushstring(IntPtr L, String s);
+        [DllImport("lua53.dll", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi, EntryPoint = "lua_pushlstring")]
+        public static extern IntPtr _lua_pushlstring(IntPtr L, String s, uint len);
+        public static String lua_pushlstring(IntPtr L, String s, uint len)
+        {
+            IntPtr p = L;
+            String s1 = s;
+            uint l = len;
+            return Marshal.PtrToStringAnsi(_lua_pushlstring(p, s1, l));
+        }
+
+        [DllImport("lua53.dll", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi, EntryPoint = "lua_pushstring")]
+        public static extern IntPtr _lua_pushstring(IntPtr L, String s);
+        public static String lua_pushstring(IntPtr L, String s)
+        {
+            IntPtr p = L;
+            String s1 = s;
+            return Marshal.PtrToStringAnsi(_lua_pushstring(p, s1));
+        }
 
         //public static extern  String lua_pushvfstring (IntPtr L, String fmt, va_list argp);
         //public static extern  String (lua_pushfstring) (IntPtr L, String fmt, ...);
@@ -193,13 +242,13 @@ namespace LuaW
         /*
         ** get functions (Lua -> stack)
         */
-        [DllImport("lua53.dll", CharSet = CharSet.Ansi)]
+        [DllImport("lua53.dll", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
         public static extern int lua_getglobal(IntPtr L, String name);
 
         [DllImport("lua53.dll", CallingConvention = CallingConvention.Cdecl)]
         public static extern int lua_gettable(IntPtr L, int idx);
 
-        [DllImport("lua53.dll", CharSet = CharSet.Ansi)]
+        [DllImport("lua53.dll", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
         public static extern int lua_getfield(IntPtr L, int idx, String k);
 
         [DllImport("lua53.dll", CallingConvention = CallingConvention.Cdecl)]
@@ -229,13 +278,13 @@ namespace LuaW
         /*
         ** set functions (stack -> Lua)
         */
-        [DllImport("lua53.dll", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl)]
+        [DllImport("lua53.dll", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
         public static extern void lua_setglobal(IntPtr L, String name);
 
         [DllImport("lua53.dll", CallingConvention = CallingConvention.Cdecl)]
         public static extern void lua_settable(IntPtr L, int idx);
 
-        [DllImport("lua53.dll", CharSet = CharSet.Ansi)]
+        [DllImport("lua53.dll", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
         public static extern void lua_setfield(IntPtr L, int idx, String k);
 
         [DllImport("lua53.dll", CallingConvention = CallingConvention.Cdecl)]
@@ -262,7 +311,6 @@ namespace LuaW
         */
         [DllImport("lua53.dll", CallingConvention = CallingConvention.Cdecl)]
         public static extern void lua_callk (IntPtr L, int nargs, int nresults, IntPtr ctx, IntPtr k);
-
         public static void lua_call(IntPtr L, int n, int r)
         {
             lua_callk(L, n, r, IntPtr.Zero, IntPtr.Zero);
@@ -270,7 +318,6 @@ namespace LuaW
 
         [DllImport("lua53.dll", CallingConvention = CallingConvention.Cdecl)]
         public static extern int lua_pcallk (IntPtr L, int nargs, int nresults, int errfunc, IntPtr ctx, IntPtr k);
-
         public static int lua_pcall(IntPtr L, int n, int r, int f)
         {
             return lua_pcallk(L, (n), (r), (f), IntPtr.Zero, IntPtr.Zero);
@@ -324,7 +371,7 @@ namespace LuaW
         [DllImport("lua53.dll", CallingConvention = CallingConvention.Cdecl)]
         public static extern void lua_len(IntPtr L, int idx);
 
-        [DllImport("lua53.dll", CharSet = CharSet.Ansi)]
+        [DllImport("lua53.dll", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
         public static extern uint lua_stringtonumber(IntPtr L, String s);
 
         //public static extern  lua_Alloc lua_getallocf (IntPtr L, IntPtr ud);
@@ -410,10 +457,10 @@ namespace LuaW
             return lua_rawgeti(L, LUA_REGISTRYINDEX, LUA_RIDX_GLOBALS);
         }
 
-        public static IntPtr lua_tostring(IntPtr L, int i)
+        public static String lua_tostring(IntPtr L, int i)
         {
-            uint j;
-            return lua_tolstring(L, (i), out j);
+            uint j = 0;
+            return lua_tolstring(L, i, ref j);
         }
 
         public static void lua_insert(IntPtr L, int idx)
@@ -440,7 +487,7 @@ namespace LuaW
         public static extern IntPtr luaL_newstate();
 
         [DllImport("lua53.dll", CallingConvention = CallingConvention.Cdecl)]
-        public static extern void luaL_checkversion(IntPtr L, Double ver, Int32 sz);
+        public static extern void luaL_checkversion(IntPtr L, Double ver, uint sz);
 
         [DllImport("lua53.dll", CallingConvention = CallingConvention.Cdecl)]
         public static extern void luaL_checkversion(IntPtr L);
@@ -448,20 +495,42 @@ namespace LuaW
         [DllImport("lua53.dll", CallingConvention = CallingConvention.Cdecl)]
         public static extern int luaL_getmetafield(IntPtr L, int obj, String e);
 
-        [DllImport("lua53.dll", CharSet = CharSet.Ansi)]
+        [DllImport("lua53.dll", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
         public static extern int luaL_callmeta(IntPtr L, int obj, String e);
 
-        [DllImport("lua53.dll", CallingConvention = CallingConvention.Cdecl)]
-        public static extern String luaL_tolstring(IntPtr L, int idx, Int32 len);
+        [DllImport("lua53.dll", CallingConvention = CallingConvention.Cdecl, EntryPoint = "luaL_tolstring")]
+        public static extern IntPtr _luaL_tolstring(IntPtr L, int idx, uint len);
+        public static String luaL_tolstring(IntPtr L, int idx, uint len)
+        {
+            IntPtr p = L;
+            int i = idx;
+            uint l = len;
+            return Marshal.PtrToStringAnsi(_luaL_tolstring(p, i, l));
+        }
 
-        [DllImport("lua53.dll", CharSet = CharSet.Ansi)]
+        [DllImport("lua53.dll", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
         public static extern int luaL_argerror(IntPtr L, int arg, String extramsg);
 
-        [DllImport("lua53.dll", CallingConvention = CallingConvention.Cdecl)]
-        public static extern String luaL_checklstring(IntPtr L, int arg, Int32 l);
+        [DllImport("lua53.dll", CallingConvention = CallingConvention.Cdecl, EntryPoint = "luaL_checklstring")]
+        public static extern IntPtr _luaL_checklstring(IntPtr L, int arg, uint l);
+        public static String luaL_checklstring(IntPtr L, int arg, uint l)
+        {
+            IntPtr p = L;
+            int a = arg;
+            uint len = l;
+            return Marshal.PtrToStringAnsi(_luaL_checklstring(p, a, len));
+        }
 
-        [DllImport("lua53.dll", CharSet = CharSet.Ansi)]
-        public static extern String luaL_optlstring(IntPtr L, int arg, String def, Int32 l);
+        [DllImport("lua53.dll", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi, EntryPoint = "luaL_optlstring")]
+        public static extern IntPtr _luaL_optlstring(IntPtr L, int arg, String def, uint l);
+        public static String luaL_optlstring(IntPtr L, int arg, String def, uint l)
+        {
+            IntPtr p = L;
+            int a = arg;
+            String d = def;
+            uint len = l;
+            return Marshal.PtrToStringAnsi(_luaL_optlstring(p, a, d, len));
+        }
 
         [DllImport("lua53.dll", CallingConvention = CallingConvention.Cdecl)]
         public static extern Double luaL_checknumber(IntPtr L, int arg);
@@ -475,7 +544,7 @@ namespace LuaW
         [DllImport("lua53.dll", CallingConvention = CallingConvention.Cdecl)]
         public static extern Int64 luaL_optinteger(IntPtr L, int arg, Int64 def);
 
-        [DllImport("lua53.dll", CharSet = CharSet.Ansi)]
+        [DllImport("lua53.dll", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
         public static extern void luaL_checkstack(IntPtr L, int sz, String msg);
 
         [DllImport("lua53.dll", CallingConvention = CallingConvention.Cdecl)]
@@ -484,16 +553,16 @@ namespace LuaW
         [DllImport("lua53.dll", CallingConvention = CallingConvention.Cdecl)]
         public static extern void luaL_checkany(IntPtr L, int arg);
 
-        [DllImport("lua53.dll", CharSet = CharSet.Ansi)]
+        [DllImport("lua53.dll", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
         public static extern int luaL_newmetatable(IntPtr L, String tname);
 
-        [DllImport("lua53.dll", CharSet = CharSet.Ansi)]
+        [DllImport("lua53.dll", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
         public static extern void luaL_setmetatable(IntPtr L, String tname);
 
-        [DllImport("lua53.dll", CharSet = CharSet.Ansi)]
+        [DllImport("lua53.dll", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
         public static extern IntPtr luaL_testudata(IntPtr L, int ud, String tname);
 
-        [DllImport("lua53.dll", CharSet = CharSet.Ansi)]
+        [DllImport("lua53.dll", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
         public static extern IntPtr luaL_checkudata(IntPtr L, int ud, String tname);
 
         [DllImport("lua53.dll", CallingConvention = CallingConvention.Cdecl)]
@@ -505,7 +574,7 @@ namespace LuaW
         //[DllImport("lua53.dll", CharSet = CharSet.Ansi)]
         //public static extern int luaL_checkoption (IntPtr L, int arg, String def, String lst[]);
 
-        [DllImport("lua53.dll", CharSet = CharSet.Ansi)]
+        [DllImport("lua53.dll", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
         public static extern int luaL_fileresult(IntPtr L, int stat, String fname);
 
         [DllImport("lua53.dll", CallingConvention = CallingConvention.Cdecl)]
@@ -517,34 +586,88 @@ namespace LuaW
         [DllImport("lua53.dll", CallingConvention = CallingConvention.Cdecl)]
         public static extern void luaL_unref(IntPtr L, int t, int r);
 
-        [DllImport("lua53.dll", CharSet = CharSet.Ansi)]
+        [DllImport("lua53.dll", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
         public static extern int luaL_loadfilex(IntPtr L, String filename, String mode);
 
-        [DllImport("lua53.dll", CharSet = CharSet.Ansi)]
+        [DllImport("lua53.dll", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
         public static extern int luaL_loadfile(IntPtr L, String f);
 
-        [DllImport("lua53.dll", CharSet = CharSet.Ansi)]
-        public static extern int luaL_loadbufferx(IntPtr L, String buff, Int32 sz, String name, String mode);
+        [DllImport("lua53.dll", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
+        public static extern int luaL_loadbufferx(IntPtr L, String buff, uint sz, String name, String mode);
 
-        [DllImport("lua53.dll", CharSet = CharSet.Ansi)]
+        [DllImport("lua53.dll", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
         public static extern int luaL_loadstring(IntPtr L, String s);
 
         [DllImport("lua53.dll", CallingConvention = CallingConvention.Cdecl)]
         public static extern Int64 luaL_len(IntPtr L, int idx);
 
-        [DllImport("lua53.dll", CharSet = CharSet.Ansi)]
-        public static extern String luaL_gsub(IntPtr L, String s, String p, String r);
+        [DllImport("lua53.dll", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi, EntryPoint = "luaL_gsub")]
+        public static extern IntPtr _luaL_gsub(IntPtr L, String s, String p, String r);
+        public static String luaL_gsub(IntPtr L, String s, String p, String r)
+        {
+            IntPtr L1 = L;
+            String s1 = s;
+            String p1 = p;
+            String r1 = r;
+            return Marshal.PtrToStringAnsi(_luaL_gsub(L1, s1, p1, r1));
+        }
 
-        [DllImport("lua53.dll", CharSet = CharSet.Ansi)]
+        [DllImport("lua53.dll", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
         public static extern int luaL_getsubtable(IntPtr L, int idx, String fname);
 
-        [DllImport("lua53.dll", CharSet = CharSet.Ansi)]
+        [DllImport("lua53.dll", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
         public static extern void luaL_traceback(IntPtr L, IntPtr L1, String msg, int level);
 
-        [DllImport("lua53.dll", CharSet = CharSet.Ansi)]
+        [DllImport("lua53.dll", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
         public static extern int luaL_dostring(IntPtr L, String s);
 
         [DllImport("lua53.dll", CallingConvention = CallingConvention.Cdecl)]
         public static extern int luaL_getmetatable(IntPtr L, int n);
+
+        /*
+         * Helpers
+         */
+        public static void DebugStackDump(IntPtr L)
+        {
+            int i;
+            int top = Lua.lua_gettop(L);
+            String str = String.Format("\nStack {0}:", L);
+            Debug.WriteLine(str);
+            Console.WriteLine(str);
+            for (i = 1; i <= top; i++)
+            {  /* repeat for each level */
+                int t = Lua.lua_type(L, i);
+                switch (t)
+                {
+
+                    case Lua.LUA_TSTRING:  /* strings */
+                        str = String.Format("L {0}: `{1}' --> string", i, Lua.lua_tostring(L, i));
+                        break;
+
+                    case Lua.LUA_TBOOLEAN:  /* booleans */
+                        str = String.Format("L {0}: {1} --> boolean", i, Lua.lua_toboolean(L, i) == 1 ? "true" : "false");
+                        break;
+
+                    case Lua.LUA_TNUMBER:  /* numbers */
+                        str = String.Format("L {0}: {1} --> number", i, Lua.lua_tonumber(L, i));
+                        break;
+
+                    case Lua.LUA_TUSERDATA:  /* user data */
+                        str = String.Format("L {0}: {1} --> userdata", i, Lua.lua_touserdata(L, i));
+                        break;
+
+                    case Lua.LUA_TLIGHTUSERDATA:  /* light user data */
+                        str = String.Format("L {0}: {1} --> lightuserdata", i, Lua.lua_touserdata(L, i));
+                        break;
+
+                    default:  /* other values */
+                        str = String.Format("L {0}: {1}", i, Lua.lua_typename(L, t));
+                        break;
+                }
+                Debug.WriteLine(str);
+                Console.WriteLine(str);
+            }
+        }
+
     }
 }
