@@ -1,0 +1,48 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 2013
+VisualStudioVersion = 12.0.31101.0
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LuaW", "LuaW.csproj", "{39894C14-00DF-434B-A796-294BAB8DD605}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LuaWTests", "..\LuaWTests\LuaWTests.csproj", "{8B3DB272-6B41-4E31-B38B-62BFF4E4F0D4}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Debug|Mixed Platforms = Debug|Mixed Platforms
+		Debug|x64 = Debug|x64
+		Release|Any CPU = Release|Any CPU
+		Release|Mixed Platforms = Release|Mixed Platforms
+		Release|x64 = Release|x64
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{39894C14-00DF-434B-A796-294BAB8DD605}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{39894C14-00DF-434B-A796-294BAB8DD605}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{39894C14-00DF-434B-A796-294BAB8DD605}.Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU
+		{39894C14-00DF-434B-A796-294BAB8DD605}.Debug|Mixed Platforms.Build.0 = Debug|Any CPU
+		{39894C14-00DF-434B-A796-294BAB8DD605}.Debug|x64.ActiveCfg = Debug|x64
+		{39894C14-00DF-434B-A796-294BAB8DD605}.Debug|x64.Build.0 = Debug|x64
+		{39894C14-00DF-434B-A796-294BAB8DD605}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{39894C14-00DF-434B-A796-294BAB8DD605}.Release|Any CPU.Build.0 = Release|Any CPU
+		{39894C14-00DF-434B-A796-294BAB8DD605}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
+		{39894C14-00DF-434B-A796-294BAB8DD605}.Release|Mixed Platforms.Build.0 = Release|Any CPU
+		{39894C14-00DF-434B-A796-294BAB8DD605}.Release|x64.ActiveCfg = Release|x64
+		{39894C14-00DF-434B-A796-294BAB8DD605}.Release|x64.Build.0 = Release|x64
+		{8B3DB272-6B41-4E31-B38B-62BFF4E4F0D4}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8B3DB272-6B41-4E31-B38B-62BFF4E4F0D4}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8B3DB272-6B41-4E31-B38B-62BFF4E4F0D4}.Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU
+		{8B3DB272-6B41-4E31-B38B-62BFF4E4F0D4}.Debug|Mixed Platforms.Build.0 = Debug|Any CPU
+		{8B3DB272-6B41-4E31-B38B-62BFF4E4F0D4}.Debug|x64.ActiveCfg = Debug|x64
+		{8B3DB272-6B41-4E31-B38B-62BFF4E4F0D4}.Debug|x64.Build.0 = Debug|x64
+		{8B3DB272-6B41-4E31-B38B-62BFF4E4F0D4}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8B3DB272-6B41-4E31-B38B-62BFF4E4F0D4}.Release|Any CPU.Build.0 = Release|Any CPU
+		{8B3DB272-6B41-4E31-B38B-62BFF4E4F0D4}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
+		{8B3DB272-6B41-4E31-B38B-62BFF4E4F0D4}.Release|Mixed Platforms.Build.0 = Release|Any CPU
+		{8B3DB272-6B41-4E31-B38B-62BFF4E4F0D4}.Release|x64.ActiveCfg = Release|x64
+		{8B3DB272-6B41-4E31-B38B-62BFF4E4F0D4}.Release|x64.Build.0 = Release|x64
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal
