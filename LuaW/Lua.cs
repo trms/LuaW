@@ -1,4 +1,17 @@
-﻿using System;
+﻿/*
+Copyright (c) 2015, Tightrope Media Systems
+All rights reserved.
+
+Redistribution and use in source and binary forms, with or without modification, are permitted provided that the following conditions are met:
+
+1. Redistributions of source code must retain the above copyright notice, this list of conditions and the following disclaimer.
+
+2. Redistributions in binary form must reproduce the above copyright notice, this list of conditions and the following disclaimer in the documentation and/or other materials provided with the distribution.
+
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ */
+
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -7,6 +20,9 @@ using System.Runtime.InteropServices;
 
 namespace LuaW
 {
+    [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
+    public delegate int lua_CFunction(IntPtr state);
+
     // https://ttuxen.wordpress.com/2009/11/03/embedding-lua-in-dotnet/
     public static class Lua
     {
@@ -160,7 +176,10 @@ namespace LuaW
 
         //public static extern  String lua_pushvfstring (IntPtr L, String fmt, va_list argp);
         //public static extern  String (lua_pushfstring) (IntPtr L, String fmt, ...);
-        //public static extern  void  (lua_pushcclosure) (IntPtr L, lua_CFunction fn, int n);
+
+        [DllImport("lua53.dll", CallingConvention = CallingConvention.Cdecl)]
+        static extern void lua_pushcclosure(IntPtr state, lua_CFunction fn, int n);
+
         [DllImport("lua53.dll", CallingConvention = CallingConvention.Cdecl)]
         public static extern void lua_pushboolean(IntPtr L, int b);
 
@@ -246,7 +265,7 @@ namespace LuaW
 
         public static void lua_call(IntPtr L, int n, int r)
         {
-            lua_callk(L, (n), (r), IntPtr.Zero, IntPtr.Zero);
+            lua_callk(L, n, r, IntPtr.Zero, IntPtr.Zero);
         }
 
         [DllImport("lua53.dll", CallingConvention = CallingConvention.Cdecl)]
@@ -341,7 +360,10 @@ namespace LuaW
 
         //#define lua_register(L,n,f) (lua_pushcfunction(L, (f)), lua_setglobal(L, (n)))
 
-        //#define lua_pushcfunction(L,f)	lua_pushcclosure(L, (f), 0)
+        public static void lua_pushcfunction(IntPtr L, lua_CFunction f)
+        {
+            lua_pushcclosure(L, f, 0);
+        }
         
         public static Boolean lua_isfunction(IntPtr L, int n)
         {
