@@ -51,6 +51,15 @@ namespace LuaW
         public const int LUA_RIDX_GLOBALS = 2;
         public const int LUA_RIDX_LAST = LUA_RIDX_GLOBALS;
 
+        /* thread status */
+        public const int LUA_OK	= 0;
+        public const int LUA_YIELD = 1;
+        public const int LUA_ERRRUN	= 2;
+        public const int LUA_ERRSYNTAX =3;
+        public const int LUA_ERRMEM	= 4;
+        public const int LUA_ERRGCMM = 5;
+        public const int LUA_ERRERR = 6;
+
         /*
          * lua
          */
@@ -146,9 +155,8 @@ namespace LuaW
         public static extern IntPtr _lua_typename(IntPtr L, int tp);
         public static String lua_typename(IntPtr L, int tp)
         {
-            IntPtr p = L;
-            int t = tp; // this is a TAG NAME, not an index into the stack
-            return Marshal.PtrToStringAnsi(_lua_typename(p, t));
+            //tp is a TAG NAME, not an index into the stack
+            return Marshal.PtrToStringAnsi(_lua_typename(L, tp));
         }
 
         [DllImport("lua53.dll", CallingConvention = CallingConvention.Cdecl)]
@@ -157,8 +165,12 @@ namespace LuaW
         [DllImport("lua53.dll", CallingConvention = CallingConvention.Cdecl)]
         public static extern Int64 lua_tointegerx(IntPtr L, int idx, IntPtr isnum);
 
-        [DllImport("lua53.dll", CallingConvention = CallingConvention.Cdecl)]
-        public static extern int lua_toboolean(IntPtr L, int idx);
+        [DllImport("lua53.dll", CallingConvention = CallingConvention.Cdecl, EntryPoint = "lua_toboolean")]
+        public static extern int _lua_toboolean(IntPtr L, int idx);
+        public static Boolean lua_toboolean(IntPtr L, int idx)
+        {
+            return _lua_toboolean(L, idx) == 1;
+        }
 
         [DllImport("lua53.dll", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi, EntryPoint = "lua_tolstring")]
         public static extern IntPtr _lua_tolstring(IntPtr L, int idx, ref uint len);
@@ -225,9 +237,7 @@ namespace LuaW
         public static extern IntPtr _lua_pushstring(IntPtr L, String s);
         public static String lua_pushstring(IntPtr L, String s)
         {
-            IntPtr p = L;
-            String s1 = s;
-            return Marshal.PtrToStringAnsi(_lua_pushstring(p, s1));
+            return Marshal.PtrToStringAnsi(_lua_pushstring(L, s));
         }
 
         //public static extern  String lua_pushvfstring (IntPtr L, String fmt, va_list argp);
@@ -236,8 +246,12 @@ namespace LuaW
         [DllImport("lua53.dll", CallingConvention = CallingConvention.Cdecl)]
         static extern void lua_pushcclosure(IntPtr state, lua_CFunction fn, int n);
 
-        [DllImport("lua53.dll", CallingConvention = CallingConvention.Cdecl)]
-        public static extern void lua_pushboolean(IntPtr L, int b);
+        [DllImport("lua53.dll", CallingConvention = CallingConvention.Cdecl, EntryPoint = "lua_pushboolean")]
+        public static extern void _lua_pushboolean(IntPtr L, int b);
+        public static void lua_pushboolean(IntPtr L, Boolean b)
+        {
+            _lua_pushboolean(L, b ? 1 : 0);
+        }
 
         [DllImport("lua53.dll", CallingConvention = CallingConvention.Cdecl)]
         public static extern void lua_pushlightuserdata(IntPtr L, IntPtr p);
@@ -509,10 +523,7 @@ namespace LuaW
         public static extern IntPtr _luaL_tolstring(IntPtr L, int idx, uint len);
         public static String luaL_tolstring(IntPtr L, int idx, uint len)
         {
-            IntPtr p = L;
-            int i = idx;
-            uint l = len;
-            return Marshal.PtrToStringAnsi(_luaL_tolstring(p, i, l));
+            return Marshal.PtrToStringAnsi(_luaL_tolstring(L, idx, len));
         }
 
         [DllImport("lua53.dll", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
@@ -522,21 +533,14 @@ namespace LuaW
         public static extern IntPtr _luaL_checklstring(IntPtr L, int arg, uint l);
         public static String luaL_checklstring(IntPtr L, int arg, uint l)
         {
-            IntPtr p = L;
-            int a = arg;
-            uint len = l;
-            return Marshal.PtrToStringAnsi(_luaL_checklstring(p, a, len));
+            return Marshal.PtrToStringAnsi(_luaL_checklstring(L, arg, l));
         }
 
         [DllImport("lua53.dll", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi, EntryPoint = "luaL_optlstring")]
         public static extern IntPtr _luaL_optlstring(IntPtr L, int arg, String def, uint l);
         public static String luaL_optlstring(IntPtr L, int arg, String def, uint l)
         {
-            IntPtr p = L;
-            int a = arg;
-            String d = def;
-            uint len = l;
-            return Marshal.PtrToStringAnsi(_luaL_optlstring(p, a, d, len));
+            return Marshal.PtrToStringAnsi(_luaL_optlstring(L, arg, def, l));
         }
 
         [DllImport("lua53.dll", CallingConvention = CallingConvention.Cdecl)]
@@ -612,11 +616,7 @@ namespace LuaW
         public static extern IntPtr _luaL_gsub(IntPtr L, String s, String p, String r);
         public static String luaL_gsub(IntPtr L, String s, String p, String r)
         {
-            IntPtr L1 = L;
-            String s1 = s;
-            String p1 = p;
-            String r1 = r;
-            return Marshal.PtrToStringAnsi(_luaL_gsub(L1, s1, p1, r1));
+            return Marshal.PtrToStringAnsi(_luaL_gsub(L, s, p, r));
         }
 
         [DllImport("lua53.dll", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
@@ -652,7 +652,7 @@ namespace LuaW
                         break;
 
                     case Lua.LUA_TBOOLEAN:  /* booleans */
-                        str = String.Format("L {0}: {1} --> boolean", i, Lua.lua_toboolean(L, i) == 1 ? "true" : "false");
+                        str = String.Format("L {0}: {1} --> boolean", i, Lua.lua_toboolean(L, i).ToString());
                         break;
 
                     case Lua.LUA_TNUMBER:  /* numbers */

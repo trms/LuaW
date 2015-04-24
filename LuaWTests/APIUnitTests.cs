@@ -11,6 +11,8 @@ namespace LuaWTests
     {
         IntPtr L { get; set; }
 
+        Boolean Event { get; set; }
+
         public APIUnitTests()
         {
             L = IntPtr.Zero;
@@ -18,12 +20,14 @@ namespace LuaWTests
 
         public int Callback(IntPtr state)
         {
+            Event = true;
             return 0;
         }
 
         [TestInitialize]
         public void InitializeLua()
         {
+            Event = false;
             L = Lua.luaL_newstate();
         }
 
@@ -67,16 +71,6 @@ namespace LuaWTests
             var t = Lua.lua_gettop(L);
 
             Assert.AreEqual(1, t);
-        }
-
-        [TestMethod]
-        public void lua_tostring()
-        {
-            var s = Lua.lua_pushstring(L, "hello");
-
-            var s2 = Lua.lua_tostring(L, -1);
-
-            Assert.AreEqual(s, s2);
         }
 
         [TestMethod]
@@ -133,6 +127,48 @@ namespace LuaWTests
         }
 
         [TestMethod]
+        public void lua_tonumber()
+        {
+            Lua.lua_pushnumber(L, 1);
+            Assert.AreEqual(1, Lua.lua_tonumber(L, -1));
+
+            Lua.lua_pushboolean(L, true);
+            Assert.AreEqual(0, Lua.lua_tonumber(L, -1));
+
+            Lua.lua_pushstring(L, "hello");
+            Assert.AreEqual(0, Lua.lua_tonumber(L, -1));
+
+            Lua.lua_pushnil(L);
+            Assert.AreEqual(0, Lua.lua_tonumber(L, -1));
+        }
+
+        [TestMethod]
+        public void lua_toboolean()
+        {
+            Lua.lua_pushboolean(L, true);
+            Assert.AreEqual(true, Lua.lua_toboolean(L, -1));
+
+            Lua.lua_pushboolean(L, false);
+            Assert.AreEqual(false, Lua.lua_toboolean(L, -1));
+
+            Lua.lua_pushnumber(L, 1234);
+            Assert.AreEqual(true, Lua.lua_toboolean(L, -1));
+        }
+
+        [TestMethod]
+        public void lua_tostring()
+        {
+            Lua.lua_pushstring(L, "hello");
+            Assert.AreEqual("hello", Lua.lua_tostring(L, -1));
+
+            Lua.lua_pushnumber(L, 1);
+            Assert.AreEqual(null, Lua.lua_tostring(L, -1));
+
+            Lua.lua_pushboolean(L, true);
+            Assert.AreEqual(null, Lua.lua_tostring(L, -1));
+        }
+
+        [TestMethod]
         public void lua_pushvalue()
         {
             Lua.lua_pushnumber(L, 1);
@@ -175,7 +211,7 @@ namespace LuaWTests
         {
             Lua.lua_pushnumber(L, 1);
             Lua.lua_pushstring(L, "hello");
-            Lua.lua_pushboolean(L, 1);
+            Lua.lua_pushboolean(L, true);
             Lua.lua_pushnil(L);
             Lua.lua_pushlightuserdata(L, p);
             Lua.lua_pushcfunction(L, Callback);
@@ -236,6 +272,43 @@ namespace LuaWTests
         public void lua_iscfunction()
         {
             lua_is("lua_iscfunction", 6);
+        }
+
+        [TestMethod]
+        public void lua_istable()
+        {
+            Lua.lua_newtable(L);
+            Assert.IsTrue(Lua.lua_istable(L, -1));
+        }
+
+        [TestMethod]
+        public void lua_settable()
+        {
+            Lua.lua_newtable(L);
+            Lua.lua_pushstring(L, "hello");
+            Lua.lua_pushstring(L, "world");
+            Lua.lua_settable(L, -3);
+            Assert.IsTrue(Lua.lua_istable(L, -1));
+        }
+
+        [TestMethod]
+        public void lua_getfield()
+        {
+            Lua.lua_newtable(L);
+            Lua.lua_pushstring(L, "hello");
+            Lua.lua_pushstring(L, "world");
+            Lua.lua_settable(L, -3);
+
+            Lua.lua_getfield(L, 1, "hello");
+            Assert.AreEqual("world", Lua.lua_tostring(L, -1));
+        }
+
+        [TestMethod]
+        public void lua_pcall()
+        {
+            Lua.lua_pushcfunction(L, Callback);
+            Assert.AreEqual(Lua.LUA_OK, Lua.lua_pcall(L, 0, 0, 0));
+            Assert.IsTrue(Event);
         }
     }
 }
