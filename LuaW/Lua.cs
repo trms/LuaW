@@ -62,8 +62,15 @@ namespace LuaW
         public static extern IntPtr lua_newthread(IntPtr L);
 
         //public static extern lua_CFunction (lua_atpanic) (IntPtr L, lua_CFunction panicf);
-        [DllImport("lua53.dll", CallingConvention = CallingConvention.Cdecl)]
-        public static extern double lua_version(IntPtr L);
+        [DllImport("lua53.dll", CallingConvention = CallingConvention.Cdecl, EntryPoint = "lua_version")]
+        public static extern IntPtr _lua_version(IntPtr L);
+        public static double lua_version(IntPtr L)
+        {
+            // I'm going to return a number here, not the address to the core's variable
+            Double[] d = {0};
+            Marshal.Copy(Lua._lua_version(L), d, 0, 1);
+            return d[0];
+        }
 
         /*
         ** basic stack manipulation
@@ -122,7 +129,7 @@ namespace LuaW
         public static extern int _lua_isinteger(IntPtr L, int idx);
         public static Boolean lua_isinteger(IntPtr L, int idx)
         {
-            return _lua_iscfunction(L, idx) == 1;
+            return _lua_isinteger(L, idx) == 1;
         }
 
         [DllImport("lua53.dll", CallingConvention = CallingConvention.Cdecl, EntryPoint="lua_isuserdata")]
@@ -140,7 +147,7 @@ namespace LuaW
         public static String lua_typename(IntPtr L, int tp)
         {
             IntPtr p = L;
-            int t = tp;
+            int t = tp; // this is a TAG NAME, not an index into the stack
             return Marshal.PtrToStringAnsi(_lua_typename(p, t));
         }
 
