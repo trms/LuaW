@@ -46,6 +46,9 @@ namespace LuaW
         public const int LUAI_FIRSTPSEUDOIDX = (-LUAI_MAXSTACK - 1000);
         public const int LUA_REGISTRYINDEX = LUAI_FIRSTPSEUDOIDX;
 
+        /* option for multiple returns in 'lua_pcall' and 'lua_call' */
+        public const int LUA_MULTRET = -1;
+
         /* predefined values in the registry */
         public const int LUA_RIDX_MAINTHREAD = 1;
         public const int LUA_RIDX_GLOBALS = 2;
@@ -505,6 +508,9 @@ namespace LuaW
          * lauxlib
          */
         [DllImport("lua53.dll", CallingConvention = CallingConvention.Cdecl)]
+        public static extern void luaL_openlibs (IntPtr L);
+
+        [DllImport("lua53.dll", CallingConvention = CallingConvention.Cdecl)]
         public static extern IntPtr luaL_newstate();
 
         [DllImport("lua53.dll", CallingConvention = CallingConvention.Cdecl)]
@@ -638,9 +644,11 @@ namespace LuaW
         {
             int i;
             int top = Lua.lua_gettop(L);
-            String str = String.Format("\nStack {0}:", L);
-            Debug.WriteLine(str);
-            Console.WriteLine(str);
+            StringBuilder message = new StringBuilder();
+            String str = String.Format("\n<<<<<<<<<<\nStack {0}:", L);
+            message.AppendLine(str);
+            //Debug.WriteLine(str);
+            //Console.WriteLine(str);
             for (i = 1; i <= top; i++)
             {  /* repeat for each level */
                 int t = Lua.lua_type(L, i);
@@ -671,9 +679,13 @@ namespace LuaW
                         str = String.Format("L {0}: {1}", i, Lua.lua_typename(L, t));
                         break;
                 }
-                Debug.WriteLine(str);
-                Console.WriteLine(str);
+                message.AppendLine(str);
+                //Debug.WriteLine(str);
+                //Console.WriteLine(str);
             }
+            message.AppendLine(">>>>>>>>>>");
+            Debug.Write(message);
+            Console.Write(message);
         }
 
     }
