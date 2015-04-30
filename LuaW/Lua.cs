@@ -24,6 +24,9 @@ namespace LuaW
     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
     public delegate int lua_CFunction(IntPtr state);
 
+    [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
+    public delegate int lua_KFunction(IntPtr L, int status, IntPtr ctx);
+
     // https://ttuxen.wordpress.com/2009/11/03/embedding-lua-in-dotnet/
     public static class Lua
     {
@@ -353,7 +356,9 @@ namespace LuaW
         /*
         ** coroutine functions
         */
-        //public static extern  int  lua_yieldk     (IntPtr L, int nresults, lua_KContext ctx, lua_KFunction k);
+        [DllImport("lua53.dll", CallingConvention = CallingConvention.Cdecl)]
+        public static extern int lua_yieldk(IntPtr L, int nresults, IntPtr ctx, lua_KFunction k);
+
         [DllImport("lua53.dll", CallingConvention = CallingConvention.Cdecl)]
         public static extern int lua_resume(IntPtr L, IntPtr from, int narg);
 
@@ -640,7 +645,7 @@ namespace LuaW
         /*
          * Helpers
          */
-        public static void DebugStackDump(IntPtr L)
+        public static void DebugStackDump(IntPtr L, Boolean deepPrint = false)
         {
             int i;
             int top = Lua.lua_gettop(L);
@@ -675,6 +680,10 @@ namespace LuaW
                         str = String.Format("L {0}: {1} --> lightuserdata", i, Lua.lua_touserdata(L, i));
                         break;
 
+                    case Lua.LUA_TTABLE:
+                        str = String.Format("L {0}: {1}", i, deepPrint ? Lua.Ts(L, i) : Lua.lua_typename(L, t));
+                        break;
+
                     default:  /* other values */
                         str = String.Format("L {0}: {1}", i, Lua.lua_typename(L, t));
                         break;
@@ -688,5 +697,29 @@ namespace LuaW
             Console.Write(message);
         }
 
+        /// <summary>
+        /// Put the variable at the specified stack index through penlight's pretty.write and return the resulting string.
+        /// For debugging purposes.
+        /// </summary>
+        /// <param name="L"></param>
+        /// <param name="index"></param>
+        /// <returns></returns>
+        public static string Ts(IntPtr L, int index)
+        {
+            var s = String.Empty;
+            var v = Lua.lua_gettop(L);
+
+            Lua.lua_getglobal(L, "require");
+            Lua.lua_pushstring(L, "pl.pretty");
+            if (Lua.lua_pcall(L, 1, 1, 0) == Lua.LUA_OK)
+            {
+                Lua.lua_getfield(L, -1, "write");
+                Lua.lua_pushvalue(L, index);
+                if (Lua.lua_pcall(L, 1, 1, 0) == Lua.LUA_OK)
+                    s = Lua.lua_tostring(L, -1);
+            }
+            Lua.lua_settop(L, v);
+            return s;
+        }
     }
 }
