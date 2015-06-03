@@ -250,7 +250,7 @@ namespace LuaW
         //public static extern  String (lua_pushfstring) (IntPtr L, String fmt, ...);
 
         [DllImport("lua53.dll", CallingConvention = CallingConvention.Cdecl)]
-        static extern void lua_pushcclosure(IntPtr state, lua_CFunction fn, int n);
+        public static extern void lua_pushcclosure(IntPtr state, lua_CFunction fn, int n);
 
         [DllImport("lua53.dll", CallingConvention = CallingConvention.Cdecl, EntryPoint = "lua_pushboolean")]
         public static extern void _lua_pushboolean(IntPtr L, int b);
@@ -337,17 +337,17 @@ namespace LuaW
         ** 'load' and 'call' functions (load and run Lua code)
         */
         [DllImport("lua53.dll", CallingConvention = CallingConvention.Cdecl)]
-        public static extern void lua_callk (IntPtr L, int nargs, int nresults, IntPtr ctx, IntPtr k);
+        public static extern void lua_callk(IntPtr L, int nargs, int nresults, IntPtr ctx, lua_KFunction k);
         public static void lua_call(IntPtr L, int n, int r)
         {
-            lua_callk(L, n, r, IntPtr.Zero, IntPtr.Zero);
+            lua_callk(L, n, r, IntPtr.Zero, null);
         }
 
         [DllImport("lua53.dll", CallingConvention = CallingConvention.Cdecl)]
-        public static extern int lua_pcallk (IntPtr L, int nargs, int nresults, int errfunc, IntPtr ctx, IntPtr k);
+        public static extern int lua_pcallk (IntPtr L, int nargs, int nresults, int errfunc, IntPtr ctx, lua_KFunction k);
         public static int lua_pcall(IntPtr L, int n, int r, int f)
         {
-            return lua_pcallk(L, (n), (r), (f), IntPtr.Zero, IntPtr.Zero);
+            return lua_pcallk(L, (n), (r), (f), IntPtr.Zero, null);
         }
 
         //public static extern  int   lua_load (IntPtr L, lua_Reader reader, void *dt, String chunkname, String mode);
@@ -369,11 +369,11 @@ namespace LuaW
         public static extern int lua_isyieldable(IntPtr L);
 
         [DllImport("lua53.dll", CallingConvention = CallingConvention.Cdecl)]
-        public static extern int lua_yieldk(IntPtr L, int n, int i, IntPtr k);
+        public static extern int lua_yieldk(IntPtr L, int n, int i, lua_KFunction k);
 
         static public int lua_yield(IntPtr L, int n)
         {
-            return lua_yieldk(L, n, 0, IntPtr.Zero);
+            return lua_yieldk(L, n, 0, null);
         }
 
         /*
@@ -434,7 +434,11 @@ namespace LuaW
             lua_createtable(L, 0, 0);
         }
 
-        //#define lua_register(L,n,f) (lua_pushcfunction(L, (f)), lua_setglobal(L, (n)))
+        public static void lua_register(IntPtr L, string s, lua_CFunction f)
+        {
+            Lua.lua_pushcfunction(L, f);
+            Lua.lua_setglobal(L, s);
+        }
 
         public static void lua_pushcfunction(IntPtr L, lua_CFunction f)
         {
@@ -717,6 +721,13 @@ namespace LuaW
                 Lua.lua_pushvalue(L, index);
                 if (Lua.lua_pcall(L, 1, 1, 0) == Lua.LUA_OK)
                     s = Lua.lua_tostring(L, -1);
+                //else
+                //{
+                //    // print the error that's on top of the stack
+                //    s = String.Format("{0} - Error: {1}",
+                //            Lua.lua_typename(L, Lua.lua_type(L, index)),
+                //            Lua.lua_tostring(L, -1));
+                //}
             }
             Lua.lua_settop(L, v);
             return s;
