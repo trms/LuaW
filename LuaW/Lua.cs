@@ -649,56 +649,85 @@ namespace LuaW
         /*
          * Helpers
          */
+
+        public delegate void DebugPrintDelegate(string s);
+        private static DebugPrintDelegate debugPrint;
+        private static object debugPrintLock = new object();
+
+        public static void AddDebugPrint(DebugPrintDelegate d)
+        {
+            lock(debugPrintLock)
+            {
+                debugPrint += d;
+            }
+        }
+        
+        public static void RemoveDebugPrint(DebugPrintDelegate d)
+        {
+            lock(debugPrintLock)
+            {
+                debugPrint -= d;
+            }
+        }
+        
         public static void DebugStackDump(IntPtr L, Boolean deepPrint = false)
         {
-            int i;
-            int top = Lua.lua_gettop(L);
-            StringBuilder message = new StringBuilder();
-            String str = String.Format("\n<<<<<<<<<<\nStack {0}:", L);
-            message.AppendLine(str);
-            //Debug.WriteLine(str);
-            //Console.WriteLine(str);
-            for (i = 1; i <= top; i++)
-            {  /* repeat for each level */
-                int t = Lua.lua_type(L, i);
-                switch (t)
-                {
-
-                    case Lua.LUA_TSTRING:  /* strings */
-                        str = String.Format("L {0}: `{1}' --> string", i, Lua.lua_tostring(L, i));
-                        break;
-
-                    case Lua.LUA_TBOOLEAN:  /* booleans */
-                        str = String.Format("L {0}: {1} --> boolean", i, Lua.lua_toboolean(L, i).ToString());
-                        break;
-
-                    case Lua.LUA_TNUMBER:  /* numbers */
-                        str = String.Format("L {0}: {1} --> number", i, Lua.lua_tonumber(L, i));
-                        break;
-
-                    case Lua.LUA_TUSERDATA:  /* user data */
-                        str = String.Format("L {0}: {1} --> userdata", i, Lua.lua_touserdata(L, i));
-                        break;
-
-                    case Lua.LUA_TLIGHTUSERDATA:  /* light user data */
-                        str = String.Format("L {0}: {1} --> lightuserdata", i, Lua.lua_touserdata(L, i));
-                        break;
-
-                    case Lua.LUA_TTABLE:
-                        str = String.Format("L {0}: {1}", i, deepPrint ? Lua.Ts(L, i) : Lua.lua_typename(L, t));
-                        break;
-
-                    default:  /* other values */
-                        str = String.Format("L {0}: {1}", i, Lua.lua_typename(L, t));
-                        break;
-                }
-                message.AppendLine(str);
-                //Debug.WriteLine(str);
-                //Console.WriteLine(str);
+            // the caller must register a delegate for this to do anything
+            // delegate list may be replaced in a different thread, need to protect it
+            DebugPrintDelegate d;
+            lock(debugPrintLock)
+            { 
+                d = debugPrint;
             }
-            message.AppendLine(">>>>>>>>>>");
-            Debug.Write(message);
-            Console.Write(message);
+            if (d != null)
+            {
+                int i;
+                int top = Lua.lua_gettop(L);
+                StringBuilder message = new StringBuilder();
+                String str = String.Format("\n<<<<<<<<<<\nStack {0}:", L);
+                message.AppendLine(str);
+
+                for (i = 1; i <= top; i++)
+                {  /* repeat for each level */
+                    int t = Lua.lua_type(L, i);
+                    switch (t)
+                    {
+
+                        case Lua.LUA_TSTRING:  /* strings */
+                            str = String.Format("L {0}: `{1}' --> string", i, Lua.lua_tostring(L, i));
+                            break;
+
+                        case Lua.LUA_TBOOLEAN:  /* booleans */
+                            str = String.Format("L {0}: {1} --> boolean", i, Lua.lua_toboolean(L, i).ToString());
+                            break;
+
+                        case Lua.LUA_TNUMBER:  /* numbers */
+                            str = String.Format("L {0}: {1} --> number", i, Lua.lua_tonumber(L, i));
+                            break;
+
+                        case Lua.LUA_TUSERDATA:  /* user data */
+                            str = String.Format("L {0}: {1} --> userdata", i, Lua.lua_touserdata(L, i));
+                            break;
+
+                        case Lua.LUA_TLIGHTUSERDATA:  /* light user data */
+                            str = String.Format("L {0}: {1} --> lightuserdata", i, Lua.lua_touserdata(L, i));
+                            break;
+
+                        case Lua.LUA_TTABLE:
+                            str = String.Format("L {0}: {1}", i, deepPrint ? Lua.Ts(L, i) : Lua.lua_typename(L, t));
+                            break;
+
+                        default:  /* other values */
+                            str = String.Format("L {0}: {1}", i, Lua.lua_typename(L, t));
+                            break;
+                    }
+                    message.AppendLine(str);
+                }
+                message.AppendLine(">>>>>>>>>>");
+
+                // print it out - someone's listening
+                d(message.ToString());
+            }
         }
 
         /// <summary>
